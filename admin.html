@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - Résultats Diagnostic 2AC</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+</head>
+<body class="bg-slate-100 min-h-screen pb-12">
+
+    <!-- Header Admin -->
+    <header class="bg-slate-800 text-white shadow-lg mb-8">
+        <div class="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <span class="text-2xl">📊</span>
+                <h1 class="font-bold text-xl tracking-tight">E-Diagnostique : Administration</h1>
+            </div>
+            <button onclick="window.location.reload()" class="bg-slate-700 hover:bg-slate-600 px-4 py-2 rounded-lg text-sm transition-colors">
+                Actualiser les données
+            </button>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 space-y-8">
+        
+        <!-- Stats de haut niveau -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+                <p class="text-slate-500 text-sm font-medium uppercase">Total Élèves</p>
+                <p id="stat-total" class="text-3xl font-bold text-slate-800">...</p>
+            </div>
+            <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+                <p class="text-slate-500 text-sm font-medium uppercase">Moyenne Générale</p>
+                <p id="stat-moyenne" class="text-3xl font-bold text-blue-600">...</p>
+            </div>
+            <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+                <p class="text-slate-500 text-sm font-medium uppercase">Réussite Matériel</p>
+                <p id="stat-mat" class="text-3xl font-bold text-emerald-600">...</p>
+            </div>
+            <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+                <p class="text-slate-500 text-sm font-medium uppercase">Réussite Logiciel</p>
+                <p id="stat-log" class="text-3xl font-bold text-amber-600">...</p>
+            </div>
+        </div>
+
+        <!-- Graphiques -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+                <h3 class="font-bold text-slate-700 mb-4">Distribution des Notes</h3>
+                <div class="h-64">
+                    <canvas id="distChart"></canvas>
+                </div>
+            </div>
+            <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+                <h3 class="font-bold text-slate-700 mb-4">Moyennes par Compétence (%)</h3>
+                <div class="h-64">
+                    <canvas id="compChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tableau des résultats -->
+        <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+            <div class="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+                <h3 class="font-bold text-slate-700">Liste détaillée des élèves</h3>
+                <div id="loading-spinner" class="text-blue-600 font-medium flex items-center gap-2">
+                    <div class="w-4 h-4 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+                    Chargement...
+                </div>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                    <thead class="bg-slate-50 text-slate-500 text-xs uppercase font-semibold">
+                        <tr>
+                            <th class="px-6 py-4">N°</th>
+                            <th class="px-6 py-4">Nom Complet</th>
+                            <th class="px-6 py-4">Classe</th>
+                            <th class="px-6 py-4 text-center">Score /20</th>
+                            <th class="px-6 py-4">Matériel</th>
+                            <th class="px-6 py-4">Logiciel</th>
+                            <th class="px-6 py-4">Général</th>
+                            <th class="px-6 py-4">Date</th>
+                        </tr>
+                    </thead>
+                    <tbody id="table-body" class="divide-y divide-slate-100 text-sm">
+                        <!-- Rempli par JS -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getFirestore, collection, getDocs, orderBy, query } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // CONFIGURATION (Identique à ton fichier index.html)
+        const firebaseConfig = {
+            apiKey: "AIzaSyDmvBWS3jVTt6oJXLCXFSLDnE2EjrOyKs8",
+            authDomain: "e-diagnostique.firebaseapp.com",
+            databaseURL: "https://e-diagnostique-default-rtdb.europe-west1.firebasedatabase.app",
+            projectId: "e-diagnostique",
+            storageBucket: "e-diagnostique.firebasestorage.app",
+            messagingSenderId: "1001086323729",
+            appId: "1:1001086323729:web:4a7340258d28c37046b5b0"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        async function loadData() {
+            try {
+                const q = query(collection(db, "resultats_2ac"));
+                const querySnapshot = await getDocs(q);
+                
+                let results = [];
+                querySnapshot.forEach(doc => results.push(doc.data()));
+
+                // Tri par numéro (côté client car index Firestore peut être manquant)
+                results.sort((a, b) => a.numero - b.numero);
+
+                updateUI(results);
+                document.getElementById('loading-spinner').classList.add('hidden');
+            } catch (error) {
+                console.error("Erreur:", error);
+                alert("Erreur de chargement. Vérifie tes règles Firestore.");
+            }
+        }
+
+        function updateUI(data) {
+            if (data.length === 0) return;
+
+            const tbody = document.getElementById('table-body');
+            let totalScore = 0;
+            let sumMat = 0, sumLog = 0, sumGen = 0;
+            let noteDistribution = [0, 0, 0, 0]; // 0-5, 5-10, 10-15, 15-20
+
+            tbody.innerHTML = '';
+            
+            data.forEach(item => {
+                totalScore += item.scoreTotal;
+                sumMat += item.acquisition.materiel;
+                sumLog += item.acquisition.logiciel;
+                sumGen += item.acquisition.generalites;
+
+                // Distribution
+                if(item.scoreTotal < 5) noteDistribution[0]++;
+                else if(item.scoreTotal < 10) noteDistribution[1]++;
+                else if(item.scoreTotal < 15) noteDistribution[2]++;
+                else noteDistribution[3]++;
+
+                // Ligne du tableau
+                const date = item.dateEnvoi ? new Date(item.dateEnvoi.seconds * 1000).toLocaleDateString('fr-FR') : '-';
+                const row = `
+                    <tr class="hover:bg-slate-50 transition-colors">
+                        <td class="px-6 py-4 font-bold text-slate-400">${item.numero}</td>
+                        <td class="px-6 py-4 font-semibold text-slate-700">${item.nom}</td>
+                        <td class="px-6 py-4"><span class="bg-slate-100 px-2 py-1 rounded text-xs">${item.classe}</span></td>
+                        <td class="px-6 py-4 text-center font-bold ${item.scoreTotal >= 10 ? 'text-emerald-600' : 'text-rose-600'}">${item.scoreTotal}</td>
+                        <td class="px-6 py-4">${renderProgress(item.acquisition.materiel)}</td>
+                        <td class="px-6 py-4">${renderProgress(item.acquisition.logiciel)}</td>
+                        <td class="px-6 py-4">${renderProgress(item.acquisition.generalites)}</td>
+                        <td class="px-6 py-4 text-slate-400 text-xs">${date}</td>
+                    </tr>
+                `;
+                tbody.innerHTML += row;
+            });
+
+            // Mise à jour des cartes
+            const count = data.length;
+            document.getElementById('stat-total').textContent = count;
+            document.getElementById('stat-moyenne').textContent = (totalScore / count).toFixed(2) + "/20";
+            document.getElementById('stat-mat').textContent = Math.round(sumMat / count) + "%";
+            document.getElementById('stat-log').textContent = Math.round(sumLog / count) + "%";
+
+            initCharts(noteDistribution, [sumMat/count, sumLog/count, sumGen/count]);
+        }
+
+        function renderProgress(val) {
+            let color = val < 50 ? 'bg-rose-500' : (val < 70 ? 'bg-amber-500' : 'bg-emerald-500');
+            return `
+                <div class="w-24">
+                    <div class="text-[10px] mb-1 font-bold">${val}%</div>
+                    <div class="w-full bg-slate-200 rounded-full h-1.5">
+                        <div class="${color} h-1.5 rounded-full" style="width: ${val}%"></div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function initCharts(distData, compData) {
+            // Chart Distribution
+            new Chart(document.getElementById('distChart'), {
+                type: 'bar',
+                data: {
+                    labels: ['0-5', '5-10', '10-15', '15-20'],
+                    datasets: [{
+                        label: 'Nombre d\'élèves',
+                        data: distData,
+                        backgroundColor: ['#f43f5e', '#f59e0b', '#3b82f6', '#10b981']
+                    }]
+                },
+                options: { maintainAspectRatio: false, plugins: { legend: { display: false } } }
+            });
+
+            // Chart Compétences
+            new Chart(document.getElementById('compChart'), {
+                type: 'polarArea',
+                data: {
+                    labels: ['Matériel', 'Logiciel', 'Généralités'],
+                    datasets: [{
+                        data: compData,
+                        backgroundColor: ['rgba(16, 185, 129, 0.5)', 'rgba(245, 158, 11, 0.5)', 'rgba(59, 130, 246, 0.5)']
+                    }]
+                },
+                options: { maintainAspectRatio: false }
+            });
+        }
+
+        window.onload = loadData;
+    </script>
+</body>
+</html>
