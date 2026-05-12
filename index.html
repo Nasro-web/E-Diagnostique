@@ -102,6 +102,37 @@
 
             <form id="evaluation-form">
                 
+                <!-- Contexte numérique (informations complémentaires, hors barème /20) -->
+                <div class="bg-white p-5 sm:p-6 rounded-2xl shadow-sm border border-slate-100 mb-6">
+                    <div class="mb-4 pb-2 border-b border-slate-100">
+                        <h3 class="text-lg font-bold text-slate-800">Accès à l'informatique et expérience scolaire</h3>
+                        <p class="text-slate-500 text-sm mt-1">Réponds honnêtement : ces indications aident à interpréter ton évaluation et ne modifient pas ta note sur 20.</p>
+                    </div>
+                    <div class="space-y-5">
+                        <div>
+                            <p class="font-medium text-slate-700 mb-3">1. Avez-vous déjà suivi le cours d'informatique en 1AC ?</p>
+                            <div class="grid grid-cols-2 gap-2 sm:gap-3 max-w-md">
+                                <div><input type="radio" name="socio1" id="socio1_oui" value="oui" class="hidden radio-custom" required><label for="socio1_oui" class="block p-3 border border-slate-200 rounded-lg cursor-pointer hover:bg-slate-50 transition-colors text-center text-sm sm:text-base">Oui</label></div>
+                                <div><input type="radio" name="socio1" id="socio1_non" value="non" class="hidden radio-custom"><label for="socio1_non" class="block p-3 border border-slate-200 rounded-lg cursor-pointer hover:bg-slate-50 transition-colors text-center text-sm sm:text-base">Non</label></div>
+                            </div>
+                        </div>
+                        <div>
+                            <p class="font-medium text-slate-700 mb-3">2. Avez-vous un ordinateur à domicile ?</p>
+                            <div class="grid grid-cols-2 gap-2 sm:gap-3 max-w-md">
+                                <div><input type="radio" name="socio2" id="socio2_oui" value="oui" class="hidden radio-custom" required><label for="socio2_oui" class="block p-3 border border-slate-200 rounded-lg cursor-pointer hover:bg-slate-50 transition-colors text-center text-sm sm:text-base">Oui</label></div>
+                                <div><input type="radio" name="socio2" id="socio2_non" value="non" class="hidden radio-custom"><label for="socio2_non" class="block p-3 border border-slate-200 rounded-lg cursor-pointer hover:bg-slate-50 transition-colors text-center text-sm sm:text-base">Non</label></div>
+                            </div>
+                        </div>
+                        <div>
+                            <p class="font-medium text-slate-700 mb-3">3. Utilisez-vous déjà un ordinateur ?</p>
+                            <div class="grid grid-cols-2 gap-2 sm:gap-3 max-w-md">
+                                <div><input type="radio" name="socio3" id="socio3_oui" value="oui" class="hidden radio-custom" required><label for="socio3_oui" class="block p-3 border border-slate-200 rounded-lg cursor-pointer hover:bg-slate-50 transition-colors text-center text-sm sm:text-base">Oui</label></div>
+                                <div><input type="radio" name="socio3" id="socio3_non" value="non" class="hidden radio-custom"><label for="socio3_non" class="block p-3 border border-slate-200 rounded-lg cursor-pointer hover:bg-slate-50 transition-colors text-center text-sm sm:text-base">Non</label></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Ex 1: QCM -->
                 <div class="bg-white p-5 sm:p-6 rounded-2xl shadow-sm border border-slate-100 mb-6">
                     <div class="flex flex-col sm:flex-row sm:items-center justify-between mb-4 pb-2 border-b border-slate-100 gap-2">
@@ -237,35 +268,31 @@
                     </div>
                     <p class="text-slate-600 mb-4 text-sm sm:text-base">Choisissez le bon mot pour compléter la définition de l'ordinateur :</p>
                     
-                    <div class="p-4 sm:p-6 bg-blue-50 border border-blue-100 rounded-xl text-slate-800 leading-loose flex flex-col gap-3 text-sm sm:text-base">
-                        <div class="flex flex-wrap items-center gap-2">
-                            <span>L'ordinateur est une machine</span>
-                            <select name="trou1" required class="border border-blue-300 rounded-lg px-2 py-1 bg-white font-semibold text-blue-700 focus:border-blue-600 outline-none shadow-sm cursor-pointer">
+                    <div class="p-4 sm:p-6 bg-blue-50 border border-blue-100 rounded-xl text-slate-800 text-sm sm:text-base leading-relaxed">
+                        <p class="inline leading-[2] sm:leading-[2.25]">
+                            L'ordinateur est une machine
+                            <select name="trou1" required class="inline-block align-middle mx-0.5 border border-blue-300 rounded-lg px-2 py-1 bg-white font-semibold text-blue-700 focus:border-blue-600 outline-none shadow-sm cursor-pointer max-w-[min(100%,11rem)]">
                                 <option value="">[ Choisir ]</option>
                                 <option value="mecanique">mécanique</option>
                                 <option value="electronique">électronique</option>
                                 <option value="manuelle">manuelle</option>
                             </select>
-                        </div>
-                        <div class="flex flex-wrap items-center gap-2">
-                            <span>qui permet le traitement</span>
-                            <select name="trou2" required class="border border-blue-300 rounded-lg px-2 py-1 bg-white font-semibold text-blue-700 focus:border-blue-600 outline-none shadow-sm cursor-pointer">
+                            qui permet le traitement
+                            <select name="trou2" required class="inline-block align-middle mx-0.5 border border-blue-300 rounded-lg px-2 py-1 bg-white font-semibold text-blue-700 focus:border-blue-600 outline-none shadow-sm cursor-pointer max-w-[min(100%,11rem)]">
                                 <option value="">[ Choisir ]</option>
                                 <option value="aleatoire">aléatoire</option>
                                 <option value="manuel">manuel</option>
                                 <option value="automatique">automatique</option>
                             </select>
-                        </div>
-                        <div class="flex flex-wrap items-center gap-2">
-                            <span>de l'</span>
-                            <select name="trou3" required class="border border-blue-300 rounded-lg px-2 py-1 bg-white font-semibold text-blue-700 focus:border-blue-600 outline-none shadow-sm cursor-pointer">
+                            de l'
+                            <select name="trou3" required class="inline-block align-middle mx-0.5 border border-blue-300 rounded-lg px-2 py-1 bg-white font-semibold text-blue-700 focus:border-blue-600 outline-none shadow-sm cursor-pointer max-w-[min(100%,11rem)]">
                                 <option value="">[ Choisir ]</option>
                                 <option value="energie">énergie</option>
                                 <option value="information">information</option>
                                 <option value="image">image</option>
                             </select>
-                            <span>.</span>
-                        </div>
+                            .
+                        </p>
                     </div>
                 </div>
 
@@ -519,6 +546,11 @@
                     nom: studentData.name,
                     numero: parseInt(studentData.number),
                     classe: studentData.class,
+                    contexteNumerique: {
+                        coursInfo1AC: formData.get('socio1'),
+                        ordinateurDomicile: formData.get('socio2'),
+                        utiliseOrdinateur: formData.get('socio3')
+                    },
                     scoreTotal: scores.total,
                     details: {
                         ex1: scores.ex1,
